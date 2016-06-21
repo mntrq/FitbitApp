@@ -59,14 +59,8 @@ router.get("/callback", function (req, res, next) {
         client.get("/profile.json", result.access_token).then(function (results) {
             console.log(results);
             res.set('Content-Type', 'text/html');
-            var tempObject = results[0];
-
-
-
-
-
-
-            res.render('index2', { title: 'Hey', message: JSON.stringify(results[0].user)});
+            var profile = results[0].user;
+            res.render('index2', { title: 'Application', user: profile});
             //res.json(JSON.stringify(results[0].user));
         });
     }).catch(function (error) {
@@ -76,7 +70,7 @@ router.get("/callback", function (req, res, next) {
 
 
 app.get('/', function(req, res, next) {
-    res.sendfile('./index.html'); // load the single view file (angular will handle the page changes on the front-end)
+    res.sendfile('./index.html');
 });
 
 // more routes for our API will happen here
