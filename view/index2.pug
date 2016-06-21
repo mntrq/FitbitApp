@@ -1,0 +1,39 @@
+html
+  head
+    title= title
+    script(src="../jquery-3.0.0.min.js")
+    script(src="../bootstrap.min.js")
+    script(src="../bootstrap.min.css")
+    script(src="../controller.js").
+     var user = !{JSON.stringify(user)};
+    
+  body
+    p
+      | Do you want to...
+      form(action='')
+        input(type='radio', name='goal', value='lose')
+        |  Lose weight
+        br
+        input(type='radio', name='goal', value='maintain')
+        |  Maintain weight
+        br
+        input(type='radio', name='goal', value='gain')
+        |  Gain weight
+        br
+
+      button#btn Submit
+      br
+      
+    p
+      | Age:
+      = ' ' + user.age
+      br
+      | Gender:
+      = ' ' + user.gender
+      br
+      | Weight:
+      = ' ' + user.weight
+      br
+      | Height:
+      = ' ' + user.height
+      br  
