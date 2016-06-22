@@ -65,7 +65,6 @@ router.get("/callback", function (req, res, next) {
     });
 });
 
-
 app.get('/', function(req, res, next) {
     res.sendfile('./index.html');
 });

@@ -43,12 +43,10 @@ html
           else if($("input[type=radio]:checked").val() == 'gain'){
             cal += 500;
           }
-          
-          alert($("input[type=radio]:checked").val() + " " + $('#activity :selected').val() + "bmr = " + bmr + " calories = " + cal);
+  
+          alert("Need " + Math.ceil(cal) + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
         });
       });
-      
-
     
   body
     h2  Hi
