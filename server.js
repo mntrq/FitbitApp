@@ -52,10 +52,7 @@ router.get("/authorize", function (req, res, next) {
 });
 
 router.get("/callback", function (req, res, next) {
-    console.log(req.query.code);
     client.getAccessToken(req.query.code, 'http://localhost:8080/api/callback').then(function (result) {
-      console.log(result);
-      console.log("after")
         client.get("/profile.json", result.access_token).then(function (results) {
             console.log(results);
             res.set('Content-Type', 'text/html');

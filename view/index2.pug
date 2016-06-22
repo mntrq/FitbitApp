@@ -2,28 +2,57 @@ html
   head
     title= title
     script(src="../jquery-3.0.0.min.js")
-    script(src="../bootstrap.min.js")
-    script(src="../bootstrap.min.css")
-    script(src="../controller.js").
-     var user = !{JSON.stringify(user)};
+    //- script(src="../bootstrap.min.js")
+    //- script(src="../bootstrap.min.css")
+    script.
+      var user = !{JSON.stringify(user)};
+      var bmr = 0;
+      var cal = 0;
+      var age = parseInt(user.age);
+      var weight = parseFloat(user.weight);
+      var height = parseFloat(user.height);
+      
+      if(user.gender == 'MALE'){
+        bmr = 66.47 + (13.75*weight) + (5.0*height) - (6.75*age);
+      }
+      else{
+        bmr = 665.09 + (9.56*weight) + (1.84*height) - (4.67*age);
+      }
+      
+      $(document).ready(function () {
+        $("#btn").click(function () {
+          if($('#activity :selected').val() == 'low'){
+            cal = bmr*1.2;
+          }
+          else if($('#activity :selected').val() == 'light'){
+            cal = bmr*1.375;
+          }
+          else if($('#activity :selected').val() == 'moderate'){
+            cal = bmr*1.55;
+          }
+          else if($('#activity :selected').val() == 'active'){
+            cal = bmr*1.725;
+          }
+          else if($('#activity :selected').val() == 'extreme'){
+            cal = bmr*1.9;
+          }
+          
+          if($("input[type=radio]:checked").val() == 'lose'){
+            cal -= 500;
+          }
+          else if($("input[type=radio]:checked").val() == 'gain'){
+            cal += 500;
+          }
+          
+          alert($("input[type=radio]:checked").val() + " " + $('#activity :selected').val() + "bmr = " + bmr + " calories = " + cal);
+        });
+      });
+      
+
     
   body
-    p
-      | Do you want to...
-      form(action='')
-        input(type='radio', name='goal', value='lose')
-        |  Lose weight
-        br
-        input(type='radio', name='goal', value='maintain')
-        |  Maintain weight
-        br
-        input(type='radio', name='goal', value='gain')
-        |  Gain weight
-        br
-
-      button#btn Submit
-      br
-      
+    h2  Hi
+      = ' ' + user.fullName
     p
       | Age:
       = ' ' + user.age
@@ -36,4 +65,30 @@ html
       br
       | Height:
       = ' ' + user.height
-      br  
+      br 
+      
+    p
+      | Do you want to...
+      form(action='')
+        input(type='radio', name='goal', value='lose')
+        |  Lose weight
+        br
+        input(type='radio', name='goal', value='maintain')
+        |  Maintain weight
+        br
+        input(type='radio', name='goal', value='gain')
+        |  Gain weight
+        br
+        
+      select#activity
+        option(value='low') Low intensity activities [no excercise]
+        option(value='light') Light exercise [excercise 1-3 days/week]
+        option(value='moderate') Moderate exercise [excercise 3-5 days/week]
+        option(value='active') Active individuals [excercise 6-7 days/week]
+        option(value='extreme') Extremely active individuals [excercise more than 7 days/week]
+      br
+      br
+      
+      button#btn Calculate
+      br
+       
