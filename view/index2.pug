@@ -23,7 +23,7 @@ html
       }
       
       $(document).ready(function () {
-        $("#btn").click(function () {
+        $("#button").click(function () {
           if($('#activity :selected').val() == 'low'){
             cal = bmr*1.2;
           }
@@ -56,10 +56,8 @@ html
     .container1
       h1  Hi!
         = ' ' + user.fullName
-        br
-        br
         
-    .container1   
+    .container1
       h3
         | Age:
         = ' ' + user.age
@@ -72,9 +70,7 @@ html
         br
         | Height:
         = ' ' + user.height + ' cm'
-        br
-      br
-      br 
+        br 
 
     .container  
       .control-group
@@ -105,7 +101,23 @@ html
       br
       br
       
+      //- .container
+      //-   button#button(type='button') 
+      //-     p Calculate
+      //-   br  
+        
       .container
-        button.btn.btn-default(type='button')#btn Calculate
-        br  
+        .interior
+          a.btn#button(href='#open-modal' type='button') 
+            p Calculate
+      //- #open-modal.modal-window
+      //-   div
+      //-     a.modal-close(href='#modal-close', title='Close') Close
+      //-     h1 Appropreate calories
+      //-     div
+      //-       p= cal
+
+
+        
+        
        

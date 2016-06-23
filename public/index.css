@@ -160,18 +160,18 @@ body {
 
 #button{
   background-color: #fff;
-  margin-top:450px;
   text-align:center;
   border: solid 1px #00C7C8;
   border-radius: 25px;
-  width:150px;
-  margin-left: 44.5%;
+  width:200px;
+  display: block;
+  margin: 400px auto 0 auto;
 }
 
 #button p{
   font-family: 'Lato', sans-serif;
   color: #00C7C8;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 #button p:hover{
