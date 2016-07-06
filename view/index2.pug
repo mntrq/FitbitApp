@@ -9,6 +9,7 @@ html
   
     script.
       var user = !{JSON.stringify(user)};
+      var steps = !{JSON.stringify(steps)};
       var bmr = 0;
       var cal = 0;
       var age = parseInt(user.age);
@@ -47,7 +48,8 @@ html
             cal += 500;
           }
   
-          alert("Need " + Math.round(cal) + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
+          //- alert("Need " + Math.round(cal) + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
+          alert(steps[0].dateTime + "   " + steps[0].value);
         
         });
       });

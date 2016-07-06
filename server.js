@@ -53,13 +53,17 @@ router.get("/authorize", function (req, res, next) {
 
 router.get("/callback", function (req, res, next) {
     client.getAccessToken(req.query.code, 'http://localhost:8080/api/callback').then(function (result) {
-        client.get("/profile.json", result.access_token).then(function (results) {
-            console.log(results);
-            res.set('Content-Type', 'text/html');
-            var profile = results[0].user;
-            res.render('index2', { title: 'Application', user: profile});
-            //res.json(JSON.stringify(results[0].user));
+      client.get("/profile.json", result.access_token).then(function (results1) {
+        client.get("/activities/steps/date/2016-07-03/1m.json", result.access_token).then(function (results2) {
+          console.log("profile " + results1[0].user.age);
+          console.log("=======================================");
+          console.log("steps " + results2[0]);
+          var profile = results1[0].user;
+          var activitiesSteps = results2[0]['activities-steps'];
+          res.set('Content-Type', 'text/html');
+          res.render('index2', { title: 'Application', user: profile, steps: activitiesSteps});
         });
+      });
     }).catch(function (error) {
         res.json(error);
     });
