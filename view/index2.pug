@@ -8,13 +8,68 @@ html
     link(href='../style.css', rel='stylesheet')
   
     script.
-      var user = !{JSON.stringify(user)};
-      var steps = !{JSON.stringify(steps)};
-      var bmr = 0;
-      var cal = 0;
-      var age = parseInt(user.age);
-      var weight = parseFloat(user.weight);
-      var height = parseFloat(user.height);
+      var user     = !{JSON.stringify(user)};
+      var activity = !{JSON.stringify(activity)};
+      var steps    = [];
+      var bmr      = 0;
+      var tee      = 0;
+      var age      = parseInt(user.age);
+      var weight   = parseFloat(user.weight);
+      var height   = parseFloat(user.height);
+      
+      var average = function(values) {
+        if (values instanceof Array) {
+          var total = 0;
+          for (var i = 0, l = values.length; i < l; i ++) {
+            var value = values[i];
+            if (!isNumeric(value)) {
+              throw TypeError('Invalid values');
+            }
+            total += value;
+          }
+          var average = (total / values.length).toFixed(8);
+          return parseFloat(average);
+        }
+        throw TypeError('Invalid values');
+      }
+      
+      var isNumeric = function(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+      }
+      
+      var calculate = function(values1, values2) {
+        if (values1 instanceof Array && values2 instanceof Array) {
+          if (values1.length == values2.length) {
+            var total = values1.length;
+            var values1_average = average(values1);
+            var values2_average = average(values2);
+            sum_values_average = 0;
+            sx = 0;
+            sy = 0;
+            
+            for (var index = 0, l = total; index < l; index ++) {
+              var value1 = values1[index];
+              var value2 = values2[index];
+              x = value1 - values1_average;
+              y = value2 - values2_average;
+              sum_values_average += (x * y);
+              sx += Math.pow(x, 2);
+              sy += Math.pow(y, 2);
+            }
+            
+            n = total - 1;
+            sx = sx / n;
+            sy = sy / n;
+            sx = Math.sqrt(sx);
+            sy = Math.sqrt(sy);
+            
+            var correlation = (sum_values_average/(n * sx * sy)).toFixed(9);
+            
+            return parseFloat(correlation);
+          }
+        }
+        throw TypeError('Invalid values');
+      };
       
       if(user.gender == 'MALE'){
         bmr = 66.47 + (13.75*weight) + (5.0*height) - (6.75*age);
@@ -24,33 +79,41 @@ html
       }
       
       $(document).ready(function () {
+        console.log(calculate([1, 2, 3, 4, 5], [0, 6, 2, 10, 4]));
+        console.log("helllllooooooooo");
+        
         $("#button").click(function () {
           if($('#activity :selected').val() == 'low'){
-            cal = bmr*1.2;
+            tee = bmr*1.2;
           }
           else if($('#activity :selected').val() == 'light'){
-            cal = bmr*1.375;
+            tee = bmr*1.375;
           }
           else if($('#activity :selected').val() == 'moderate'){
-            cal = bmr*1.55;
+            tee = bmr*1.55;
           }
           else if($('#activity :selected').val() == 'active'){
-            cal = bmr*1.725;
+            tee = bmr*1.725;
           }
           else if($('#activity :selected').val() == 'extreme'){
-            cal = bmr*1.9;
+            tee = bmr*1.9;
           }
           
           if($("input[type=radio]:checked").val() == 'lose'){
-            cal -= 500;
+            tee -= 500;
           }
           else if($("input[type=radio]:checked").val() == 'gain'){
-            cal += 500;
+            tee += 500;
           }
-  
+          
+          for(var i=0 ; i<activity.length ; i++){
+            steps.push(parseInt(activity[i].value));
+            console.log(steps[i]);
+            console.log(average(steps));
+          }
+          
           //- alert("Need " + Math.round(cal) + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
-          alert(steps[0].dateTime + "   " + steps[0].value);
-        
+          alert("day " + activity.length + "  average " + Math.round(average(steps)));
         });
       });
 

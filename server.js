@@ -4,11 +4,11 @@
 // =============================================================================
 
 // call the packages we need
-var express    = require('express');        // call express
-var app        = express();                 // define our app using express
-var bodyParser = require('body-parser');
-var cors       = require('cors');
-console.log(cors);
+var express     = require('express');        // call express
+var app         = express();                 // define our app using express
+var bodyParser  = require('body-parser');
+var cors        = require('cors');
+
 app.use(cors());
 var router = express.Router();
 
@@ -58,10 +58,11 @@ router.get("/callback", function (req, res, next) {
           console.log("profile " + results1[0].user.age);
           console.log("=======================================");
           console.log("steps " + results2[0]);
+
           var profile = results1[0].user;
           var activitiesSteps = results2[0]['activities-steps'];
           res.set('Content-Type', 'text/html');
-          res.render('index2', { title: 'Application', user: profile, steps: activitiesSteps});
+          res.render('index2', { title: 'Application', user: profile, activity: activitiesSteps});
         });
       });
     }).catch(function (error) {
