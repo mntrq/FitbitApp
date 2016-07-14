@@ -8,14 +8,18 @@ html
     link(href='../style.css', rel='stylesheet')
   
     script.
-      var user     = !{JSON.stringify(user)};
-      var activity = !{JSON.stringify(activity)};
-      var steps    = [];
-      var bmr      = 0;
-      var tee      = 0;
-      var age      = parseInt(user.age);
-      var weight   = parseFloat(user.weight);
-      var height   = parseFloat(user.height);
+      var user          = !{JSON.stringify(user)};
+      var activity      = !{JSON.stringify(activity)};
+      var age           = parseInt(user.age);
+      var weight        = parseFloat(user.weight);
+      var height        = parseFloat(user.height);
+      var bmr           = 0;
+      var tee           = 0;
+      var steps         = [];
+      var arr1          = [];
+      var arr2          = [];
+      var correlations  = [];
+      var duration      = 5;
       
       var average = function(values) {
         if (values instanceof Array) {
@@ -37,7 +41,7 @@ html
             return !isNaN(parseFloat(n)) && isFinite(n);
       }
       
-      var calculate = function(values1, values2) {
+      var calculateCorrelation = function(values1, values2) {
         if (values1 instanceof Array && values2 instanceof Array) {
           if (values1.length == values2.length) {
             var total = values1.length;
@@ -56,7 +60,7 @@ html
               sx += Math.pow(x, 2);
               sy += Math.pow(y, 2);
             }
-            
+          
             n = total - 1;
             sx = sx / n;
             sy = sy / n;
@@ -71,46 +75,75 @@ html
         throw TypeError('Invalid values');
       };
       
-      if(user.gender == 'MALE'){
-        bmr = 66.47 + (13.75*weight) + (5.0*height) - (6.75*age);
+      var calculateBMR = function(){
+        if(user.gender == 'MALE'){
+          bmr = 66.47 + (13.75*weight) + (5.0*height) - (6.75*age);
+        }
+        else{
+          bmr = 665.09 + (9.56*weight) + (1.84*height) - (4.67*age);
+        }
       }
-      else{
-        bmr = 665.09 + (9.56*weight) + (1.84*height) - (4.67*age);
+      
+      var calculateTEE = function(){
+        if($('#activity :selected').val() == 'low'){
+          tee = bmr*1.2;
+        }
+        else if($('#activity :selected').val() == 'light'){
+          tee = bmr*1.375;
+        }
+        else if($('#activity :selected').val() == 'moderate'){
+          tee = bmr*1.55;
+        }
+        else if($('#activity :selected').val() == 'active'){
+          tee = bmr*1.725;
+        }
+        else if($('#activity :selected').val() == 'extreme'){
+          tee = bmr*1.9;
+        }
+        
+        if($("input[type=radio]:checked").val() == 'lose'){
+          tee -= 500;
+        }
+        else if($("input[type=radio]:checked").val() == 'gain'){
+          tee += 500;
+        }
+      }
+      
+      var addSteps = function(){
+        for(var i=0 ; i<activity.length ; i++){
+          steps.push(parseInt(activity[i].value));
+          console.log("day " + (i+1) + " steps " + steps[i]);
+        }
+      }
+      
+      var findMaxCorrelation = function(){
+        for(var i=0; i<(activity.length - duration) ; i+=duration){
+          for(var j=i ; j<i+duration ; j++){
+            arr1.push(steps[j]);
+            arr2.push(steps[j+1]);
+          }
+          
+          correlations.push(calculateCorrelation(arr1, arr2));
+          
+          console.log("arr1 " + arr1);
+          console.log("arr2 " + arr2);
+          console.log("correlation = " + correlations[i/duration]);
+          arr1.splice(0,arr1.length);
+          arr2.splice(0,arr2.length);
+        }
+        console.log(correlations);
+        correlations.sort();
+        console.log(correlations);
       }
       
       $(document).ready(function () {
-        console.log(calculate([1, 2, 3, 4, 5], [0, 6, 2, 10, 4]));
         console.log("helllllooooooooo");
+        addSteps();
+        findMaxCorrelation();
         
         $("#button").click(function () {
-          if($('#activity :selected').val() == 'low'){
-            tee = bmr*1.2;
-          }
-          else if($('#activity :selected').val() == 'light'){
-            tee = bmr*1.375;
-          }
-          else if($('#activity :selected').val() == 'moderate'){
-            tee = bmr*1.55;
-          }
-          else if($('#activity :selected').val() == 'active'){
-            tee = bmr*1.725;
-          }
-          else if($('#activity :selected').val() == 'extreme'){
-            tee = bmr*1.9;
-          }
-          
-          if($("input[type=radio]:checked").val() == 'lose'){
-            tee -= 500;
-          }
-          else if($("input[type=radio]:checked").val() == 'gain'){
-            tee += 500;
-          }
-          
-          for(var i=0 ; i<activity.length ; i++){
-            steps.push(parseInt(activity[i].value));
-            console.log(steps[i]);
-            console.log(average(steps));
-          }
+          calculateBMR();
+          calculateTEE();
           
           //- alert("Need " + Math.round(cal) + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
           alert("day " + activity.length + "  average " + Math.round(average(steps)));

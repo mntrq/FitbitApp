@@ -55,10 +55,6 @@ router.get("/callback", function (req, res, next) {
     client.getAccessToken(req.query.code, 'http://localhost:8080/api/callback').then(function (result) {
       client.get("/profile.json", result.access_token).then(function (results1) {
         client.get("/activities/steps/date/2016-07-03/1m.json", result.access_token).then(function (results2) {
-          console.log("profile " + results1[0].user.age);
-          console.log("=======================================");
-          console.log("steps " + results2[0]);
-
           var profile = results1[0].user;
           var activitiesSteps = results2[0]['activities-steps'];
           res.set('Content-Type', 'text/html');
