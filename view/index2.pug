@@ -15,6 +15,7 @@ html
     var height        = parseFloat(user.height);
     var duration      = 5;
     var index         = 0;
+    var tee           = 0;
     var steps         = [];
     var today         = new Date().toJSON().slice(0,10);
     var authenticate  = !{JSON.stringify(authenticate)};
@@ -108,12 +109,12 @@ html
       else if($("input[type=radio]:checked").val() == 'gain'){
         tee += 500;
       }  
-      return Math.round(tee);
+      tee = Math.round(tee);
     }
     
-    var addSteps = function(i){
-      for(i ; i<activity.length ; i++){
-        steps.push(parseInt(activity[i].value));
+    var addSteps = function(index){
+      for(index ; index<activity.length ; index++){
+        steps.push(parseInt(activity[index].value));
       }
     }
     
@@ -131,8 +132,8 @@ html
         correlations.push(calculateCorrelation(arr1, arr2));
         
         if(correlations[i/duration] > max){
-          var max   = correlations[i/duration];
-          var index = i;
+          max   = correlations[i/duration];
+          index = i;
         }
         arr1.splice(0, arr1.length);
         arr2.splice(0, arr2.length);
@@ -147,48 +148,52 @@ html
       var averageStep = Math.round(average(steps));
       var moreAverage = [];
       var lessAverage = [];
+      var j           = index;
       
-      for(i=0,index ; index<activity.length ; i++,index++){
+      for(i=0 ; j<activity.length ; i++,j++){
         if(steps[i] > averageStep){
-          moreAverage.push(getDayName(activity[index].dateTime));
+          moreAverage.push(getDayName(activity[j].dateTime));
         }
         else {
-          lessAverage.push(getDayName(activity[index].dateTime));
+          lessAverage.push(getDayName(activity[j].dateTime));
         }
       }
       
       if(moreAverage.indexOf(getDayName(today)) == -1){ //steps are less than average
-        
+        console.log(tee);
       }
       else{ //steps are more than average
-        
+        tee *= 1.2;
+        console.log(tee);
       }
       console.log("More " + moreAverage);
       console.log("Less " + lessAverage);
       console.log(moreAverage.indexOf(getDayName(today)));
       console.log(lessAverage.indexOf(getDayName(today)));
+      console.log(getDayName(today));
+      moreAverage.splice(0, moreAverage.length);
+      lessAverage.splice(0, lessAverage.length);
     }
     
     $(document).ready(function () {
-      console.log(authenticate);
       addSteps(0);
       findMaxCorrelation();
       steps.splice(0, steps.length);
       addSteps(index);
-      sugggestCal();
       
       $("#button").click(function () {  
-        var tempTee = calculateTEE();
+        calculateTEE();
+        sugggestCal();
         var tempBody = {
-          calories : tempTee
+          calories : tee
         };
          
         $.ajax({
           url: 'http://localhost:8080/api/postFoodGoal',
           type: 'post',
-          data: { "goals": {"calories" : calculateTEE()} },
+          data: { "goals": {"calories" : tee} },
           success: function(data) {
-            alert("You need " + data + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
+            alert("You need " + data[0].goals.calories + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
             console.log(data);
           },
           error: function(xhr, ajaxOptions, thrownError) {
