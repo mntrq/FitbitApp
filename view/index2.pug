@@ -1,154 +1,203 @@
 html
-  head
-    title= title
-    script(src="../jquery-2.2.4.min.js")
-    script(src="../bootstrap.min.js")
-    link(href='../bootstrap.min.css', rel='stylesheet')
-    link(href='../bootstrap.min.css.map', rel='stylesheet')
-    link(href='../style.css', rel='stylesheet')
+ head
+  title= title
+  script(src="../jquery-2.2.4.min.js")
+  script(src="../bootstrap.min.js")
+  link(href='../bootstrap.min.css', rel='stylesheet')
+  link(href='../bootstrap.min.css.map', rel='stylesheet')
+  link(href='../style.css', rel='stylesheet')
   
-    script.
-      var user          = !{JSON.stringify(user)};
-      var activity      = !{JSON.stringify(activity)};
-      var age           = parseInt(user.age);
-      var weight        = parseFloat(user.weight);
-      var height        = parseFloat(user.height);
-      var bmr           = 0;
-      var tee           = 0;
-      var steps         = [];
+  script.
+    var user          = !{JSON.stringify(user)};
+    var activity      = !{JSON.stringify(activity)};
+    var age           = parseInt(user.age);
+    var weight        = parseFloat(user.weight);
+    var height        = parseFloat(user.height);
+    var duration      = 5;
+    var index         = 0;
+    var steps         = [];
+    var today         = new Date().toJSON().slice(0,10);
+    var authenticate  = !{JSON.stringify(authenticate)};
+      
+    var average = function(values) {
+      if (values instanceof Array) {
+        var total = 0;
+        for (var i = 0, l = values.length; i < l; i ++) {
+          var value = values[i];
+          if (!isNumeric(value)) {
+            throw TypeError('Invalid values');
+          }
+          total += value;
+        }
+        var average = (total / values.length).toFixed(8);
+        return parseFloat(average);
+      }
+      throw TypeError('Invalid values');
+    }
+    
+    var isNumeric = function(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    
+    var calculateCorrelation = function(values1, values2) {
+      if (values1 instanceof Array && values2 instanceof Array) {
+        if (values1.length == values2.length) {
+          var total = values1.length;
+          var values1_average = average(values1);
+          var values2_average = average(values2);
+          sum_values_average = 0;
+          sx = 0;
+          sy = 0;
+          
+          for (var index = 0, l = total; index < l; index ++) {
+            var value1 = values1[index];
+            var value2 = values2[index];
+            x = value1 - values1_average;
+            y = value2 - values2_average;
+            sum_values_average += (x * y);
+            sx += Math.pow(x, 2);
+            sy += Math.pow(y, 2);
+          }
+        
+          n = total - 1;
+          
+          sx = sx / n;
+          sy = sy / n;
+          sx = Math.sqrt(sx);
+          sy = Math.sqrt(sy);
+          
+          var correlation = (sum_values_average/(n * sx * sy)).toFixed(9);
+          return parseFloat(correlation);
+        }
+      }
+      throw TypeError('Invalid values');
+    };
+    
+    var calculateBMR = function(){
+      var bmr = 0;
+      if(user.gender == 'MALE'){
+        bmr = 66.47 + (13.75*weight) + (5.0*height) - (6.75*age);
+      }
+      else{
+        bmr = 665.09 + (9.56*weight) + (1.84*height) - (4.67*age);
+      }
+      return bmr;
+    }
+    
+    var calculateTEE = function(){
+      var bmr = calculateBMR();
+      if($('#activity :selected').val() == 'low'){
+        tee = bmr*1.2;
+      }
+      else if($('#activity :selected').val() == 'light'){
+        tee = bmr*1.375;
+      }
+      else if($('#activity :selected').val() == 'moderate'){
+        tee = bmr*1.55;
+      }
+      else if($('#activity :selected').val() == 'active'){
+        tee = bmr*1.725;
+      }
+      else if($('#activity :selected').val() == 'extreme'){
+        tee = bmr*1.9;
+      }
+      
+      if($("input[type=radio]:checked").val() == 'lose'){
+        tee -= 500;
+      }
+      else if($("input[type=radio]:checked").val() == 'gain'){
+        tee += 500;
+      }  
+      return Math.round(tee);
+    }
+    
+    var addSteps = function(i){
+      for(i ; i<activity.length ; i++){
+        steps.push(parseInt(activity[i].value));
+      }
+    }
+    
+    var findMaxCorrelation = function(){
       var arr1          = [];
       var arr2          = [];
       var correlations  = [];
-      var duration      = 5;
+      var max           = 0;
       
-      var average = function(values) {
-        if (values instanceof Array) {
-          var total = 0;
-          for (var i = 0, l = values.length; i < l; i ++) {
-            var value = values[i];
-            if (!isNumeric(value)) {
-              throw TypeError('Invalid values');
-            }
-            total += value;
-          }
-          var average = (total / values.length).toFixed(8);
-          return parseFloat(average);
+      for(var i=0; i<(activity.length - duration) ; i+=duration){
+        for(var j=i ; j<i+duration ; j++){
+          arr1.push(steps[j]);
+          arr2.push(steps[j+1]);
         }
-        throw TypeError('Invalid values');
-      }
-      
-      var isNumeric = function(n) {
-            return !isNaN(parseFloat(n)) && isFinite(n);
-      }
-      
-      var calculateCorrelation = function(values1, values2) {
-        if (values1 instanceof Array && values2 instanceof Array) {
-          if (values1.length == values2.length) {
-            var total = values1.length;
-            var values1_average = average(values1);
-            var values2_average = average(values2);
-            sum_values_average = 0;
-            sx = 0;
-            sy = 0;
-            
-            for (var index = 0, l = total; index < l; index ++) {
-              var value1 = values1[index];
-              var value2 = values2[index];
-              x = value1 - values1_average;
-              y = value2 - values2_average;
-              sum_values_average += (x * y);
-              sx += Math.pow(x, 2);
-              sy += Math.pow(y, 2);
-            }
-          
-            n = total - 1;
-            sx = sx / n;
-            sy = sy / n;
-            sx = Math.sqrt(sx);
-            sy = Math.sqrt(sy);
-            
-            var correlation = (sum_values_average/(n * sx * sy)).toFixed(9);
-            
-            return parseFloat(correlation);
-          }
-        }
-        throw TypeError('Invalid values');
-      };
-      
-      var calculateBMR = function(){
-        if(user.gender == 'MALE'){
-          bmr = 66.47 + (13.75*weight) + (5.0*height) - (6.75*age);
-        }
-        else{
-          bmr = 665.09 + (9.56*weight) + (1.84*height) - (4.67*age);
-        }
-      }
-      
-      var calculateTEE = function(){
-        if($('#activity :selected').val() == 'low'){
-          tee = bmr*1.2;
-        }
-        else if($('#activity :selected').val() == 'light'){
-          tee = bmr*1.375;
-        }
-        else if($('#activity :selected').val() == 'moderate'){
-          tee = bmr*1.55;
-        }
-        else if($('#activity :selected').val() == 'active'){
-          tee = bmr*1.725;
-        }
-        else if($('#activity :selected').val() == 'extreme'){
-          tee = bmr*1.9;
-        }
+        correlations.push(calculateCorrelation(arr1, arr2));
         
-        if($("input[type=radio]:checked").val() == 'lose'){
-          tee -= 500;
+        if(correlations[i/duration] > max){
+          var max   = correlations[i/duration];
+          var index = i;
         }
-        else if($("input[type=radio]:checked").val() == 'gain'){
-          tee += 500;
+        arr1.splice(0, arr1.length);
+        arr2.splice(0, arr2.length);
+      }
+    }
+    
+    var getDayName = function(dateString) {
+      return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(dateString).getDay()];
+    }
+    
+    var sugggestCal = function(){
+      var averageStep = Math.round(average(steps));
+      var moreAverage = [];
+      var lessAverage = [];
+      
+      for(i=0,index ; index<activity.length ; i++,index++){
+        if(steps[i] > averageStep){
+          moreAverage.push(getDayName(activity[index].dateTime));
+        }
+        else {
+          lessAverage.push(getDayName(activity[index].dateTime));
         }
       }
       
-      var addSteps = function(){
-        for(var i=0 ; i<activity.length ; i++){
-          steps.push(parseInt(activity[i].value));
-          console.log("day " + (i+1) + " steps " + steps[i]);
-        }
-      }
-      
-      var findMaxCorrelation = function(){
-        for(var i=0; i<(activity.length - duration) ; i+=duration){
-          for(var j=i ; j<i+duration ; j++){
-            arr1.push(steps[j]);
-            arr2.push(steps[j+1]);
-          }
-          
-          correlations.push(calculateCorrelation(arr1, arr2));
-          
-          console.log("arr1 " + arr1);
-          console.log("arr2 " + arr2);
-          console.log("correlation = " + correlations[i/duration]);
-          arr1.splice(0,arr1.length);
-          arr2.splice(0,arr2.length);
-        }
-        console.log(correlations);
-        correlations.sort();
-        console.log(correlations);
-      }
-      
-      $(document).ready(function () {
-        console.log("helllllooooooooo");
-        addSteps();
-        findMaxCorrelation();
+      if(moreAverage.indexOf(getDayName(today)) == -1){ //steps are less than average
         
-        $("#button").click(function () {
-          calculateBMR();
-          calculateTEE();
-          
-          //- alert("Need " + Math.round(cal) + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
-          alert("day " + activity.length + "  average " + Math.round(average(steps)));
+      }
+      else{ //steps are more than average
+        
+      }
+      console.log("More " + moreAverage);
+      console.log("Less " + lessAverage);
+      console.log(moreAverage.indexOf(getDayName(today)));
+      console.log(lessAverage.indexOf(getDayName(today)));
+    }
+    
+    $(document).ready(function () {
+      console.log(authenticate);
+      addSteps(0);
+      findMaxCorrelation();
+      steps.splice(0, steps.length);
+      addSteps(index);
+      sugggestCal();
+      
+      $("#button").click(function () {  
+        var tempTee = calculateTEE();
+        var tempBody = {
+          calories : tempTee
+        };
+         
+        $.ajax({
+          url: 'http://localhost:8080/api/postFoodGoal',
+          type: 'post',
+          data: { "goals": {"calories" : calculateTEE()} },
+          success: function(data) {
+            alert("You need " + data + " calories/day to " + $("input[type=radio]:checked").val() + " your weight");
+            console.log(data);
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+          }
         });
       });
+    });
 
   body
     .container1
@@ -198,22 +247,11 @@ html
           .select__arrow
       br
       br
-      
-      //- .container
-      //-   button#button(type='button') 
-      //-     p Calculate
-      //-   br  
         
       .container
         .interior
           a.btn#button(href='#open-modal' type='button') 
             p Calculate
-      //- #open-modal.modal-window
-      //-   div
-      //-     a.modal-close(href='#modal-close', title='Close') Close
-      //-     h1 Appropreate calories
-      //-     div
-      //-       p= cal
 
 
         

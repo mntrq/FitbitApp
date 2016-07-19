@@ -33,16 +33,15 @@ var allowCrossDomain = function(req, res, next) {
 // this will let us get the data from a POST
 
 app.use(allowCrossDomain);
-
-app.use('/api', router);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.set('views', './view')
 app.set('view engine', 'pug');
-
+app.use('/api', router);
 var port = process.env.PORT || 8080;        // set our port
 var globalObject;
+var accessToken;
 // ROUTES FOR OUR API
 // =============================================================================
 // var router = express.Router();              // get an instance of the express Router
@@ -53,17 +52,24 @@ router.get("/authorize", function (req, res, next) {
 
 router.get("/callback", function (req, res, next) {
     client.getAccessToken(req.query.code, 'http://localhost:8080/api/callback').then(function (result) {
+      accessToken = result.access_token;
       client.get("/profile.json", result.access_token).then(function (results1) {
         client.get("/activities/steps/date/2016-07-03/1m.json", result.access_token).then(function (results2) {
           var profile = results1[0].user;
           var activitiesSteps = results2[0]['activities-steps'];
           res.set('Content-Type', 'text/html');
-          res.render('index2', { title: 'Application', user: profile, activity: activitiesSteps});
+          res.render('index2', { title: 'Application', user: profile, activity: activitiesSteps, authenticate: result.access_token});
         });
       });
     }).catch(function (error) {
         res.json(error);
     });
+});
+
+router.post("/postFoodGoal", function(req, res) {
+  client.post("/foods/log/goal.json?calories=" + req.body.goals.calories, accessToken, req.body).then(function(result) {
+    res.json(result);
+  });
 });
 
 app.get('/', function(req, res, next) {
